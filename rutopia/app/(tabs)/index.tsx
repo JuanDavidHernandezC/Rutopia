@@ -4,6 +4,7 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LUGARES, EMPRENDEDORES, useApp } from '../../context/AppContext';
 
+
 export default function HomeScreen() {
   const { usuario } = useApp();
   const [showPromo, setShowPromo] = useState(false);
