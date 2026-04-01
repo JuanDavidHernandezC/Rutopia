@@ -1,25 +1,23 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Image } from 'react-native';
 import { useState, useEffect } from 'react';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LUGARES, EMPRENDEDORES, useApp } from '../../context/AppContext';
 
-
 export default function HomeScreen() {
-  const { usuario } = useApp();
+  const { usuario, t } = useApp();
   const [showPromo, setShowPromo] = useState(false);
-  const patrocinados = LUGARES.filter(l => l.patrocinado);
   const top3 = [...LUGARES].sort((a, b) => b.calificacion - a.calificacion).slice(0, 3);
 
   useEffect(() => {
-    const t = setTimeout(() => setShowPromo(true), 1500);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setShowPromo(true), 1500);
+    return () => clearTimeout(timer);
   }, []);
 
   return (
     <ScrollView style={s.screen} showsVerticalScrollIndicator={false}>
 
-      {/* Pop-up oferta al abrir */}
+      {/* Pop-up oferta */}
       <Modal visible={showPromo} transparent animationType="fade">
         <View style={s.modalOverlay}>
           <View style={s.modalBox}>
@@ -39,11 +37,11 @@ export default function HomeScreen() {
       {/* Hero */}
       <View style={s.hero}>
         <Text style={s.heroSub}>Sabana Centro · Colombia</Text>
-        <Text style={s.heroTitle}>Hola, {usuario?.nombre?.split(' ')[0]} 👋</Text>
-        <Text style={s.heroDesc}>¿A dónde vamos hoy?</Text>
+        <Text style={s.heroTitle}>{t.hola}, {usuario?.nombre?.split(' ')[0]} 👋</Text>
+        <Text style={s.heroDesc}>{t.dondeVamos}</Text>
         <TouchableOpacity style={s.searchBtn} onPress={() => router.push('/(tabs)/two' as any)}>
           <Ionicons name="search" size={16} color="#86a892" />
-          <Text style={s.searchBtnText}>Buscar lugares, municipios...</Text>
+          <Text style={s.searchBtnText}>{t.buscar}</Text>
         </TouchableOpacity>
       </View>
 
@@ -60,13 +58,17 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Café destacado del día */}
+      {/* Café destacado */}
       <View style={s.section}>
         <Text style={s.sectionTitle}>☕ Café destacado del día</Text>
         <TouchableOpacity style={s.featuredCard} onPress={() => router.push('/lugar/4' as any)}>
-          <View style={[s.featuredImg, { backgroundColor: '#92400e' }]}>
-            <Text style={s.featuredImgText}>CAFÉ</Text>
-          </View>
+          {LUGARES[3].imagen ? (
+            <Image source={{ uri: LUGARES[3].imagen }} style={s.featuredImg} resizeMode="cover" />
+          ) : (
+            <View style={[s.featuredImgPlaceholder, { backgroundColor: LUGARES[3].color }]}>
+              <Text style={s.featuredImgText}>CAFÉ</Text>
+            </View>
+          )}
           <View style={s.featuredBody}>
             <Text style={s.featuredName}>Café de Montaña</Text>
             <Text style={s.featuredSub}>📍 Tabio · ⭐ 4.9</Text>
@@ -78,13 +80,18 @@ export default function HomeScreen() {
       {/* Top 3 */}
       <View style={s.section}>
         <View style={s.rowBetween}>
-          <Text style={s.sectionTitle}>🏆 Top lugares</Text>
+          <Text style={s.sectionTitle}>🏆 {t.ranking}</Text>
           <TouchableOpacity onPress={() => router.push('/(tabs)/ranking' as any)}>
             <Text style={s.verTodos}>Ver ranking →</Text>
           </TouchableOpacity>
         </View>
         {top3.map((lugar, i) => (
-          <TouchableOpacity key={lugar.id} style={s.topCard} onPress={() => router.push(`/lugar/${lugar.id}` as any)} activeOpacity={0.9}>
+          <TouchableOpacity
+            key={lugar.id}
+            style={s.topCard}
+            onPress={() => router.push(`/lugar/${lugar.id}` as any)}
+            activeOpacity={0.9}
+          >
             <Text style={s.topMedal}>{['🥇','🥈','🥉'][i]}</Text>
             <View style={[s.topDot, { backgroundColor: lugar.color }]} />
             <Text style={s.topNombre} numberOfLines={1}>{lugar.nombre}</Text>
@@ -93,10 +100,10 @@ export default function HomeScreen() {
         ))}
       </View>
 
-      {/* Emprendedores destacados */}
+      {/* Emprendedores */}
       <View style={s.section}>
         <View style={s.rowBetween}>
-          <Text style={s.sectionTitle}>👥 Emprendedores</Text>
+          <Text style={s.sectionTitle}>👥 {t.emprendedores}</Text>
           <TouchableOpacity onPress={() => router.push('/(tabs)/emprendedores' as any)}>
             <Text style={s.verTodos}>Ver todos →</Text>
           </TouchableOpacity>
@@ -104,9 +111,13 @@ export default function HomeScreen() {
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12 }}>
           {EMPRENDEDORES.slice(0, 4).map(e => (
             <View key={e.id} style={s.empCard}>
-              <View style={[s.empAvatar, { backgroundColor: e.color }]}>
-                <Text style={s.empAvatarText}>{e.nombre[0]}</Text>
-              </View>
+              {e.imagen ? (
+                <Image source={{ uri: e.imagen }} style={s.empAvatar} />
+              ) : (
+                <View style={[s.empAvatarPlaceholder, { backgroundColor: e.color }]}>
+                  <Text style={s.empAvatarText}>{e.nombre[0]}</Text>
+                </View>
+              )}
               <Text style={s.empNombre} numberOfLines={1}>{e.nombre.split(' ')[0]}</Text>
               <Text style={s.empNegocio} numberOfLines={1}>{e.negocio}</Text>
               <Text style={s.empRating}>⭐ {e.calificacion}</Text>
@@ -149,7 +160,8 @@ const s = StyleSheet.create({
   rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
   verTodos: { fontSize: 13, color: '#16a34a', fontWeight: '600' },
   featuredCard: { backgroundColor: '#fff', borderRadius: 16, flexDirection: 'row', overflow: 'hidden', elevation: 3, shadowColor: '#0f4c20', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8 },
-  featuredImg: { width: 100, alignItems: 'center', justifyContent: 'center' },
+  featuredImg: { width: 100, height: 90 },
+  featuredImgPlaceholder: { width: 100, alignItems: 'center', justifyContent: 'center', height: 90 },
   featuredImgText: { color: '#fff', fontWeight: '700', fontSize: 12 },
   featuredBody: { flex: 1, padding: 14, gap: 4 },
   featuredName: { fontSize: 16, fontWeight: '700', color: '#0f4c20' },
@@ -161,7 +173,8 @@ const s = StyleSheet.create({
   topNombre: { flex: 1, fontSize: 14, fontWeight: '600', color: '#0f4c20' },
   topRating: { fontSize: 13, fontWeight: '700', color: '#0f4c20' },
   empCard: { backgroundColor: '#fff', borderRadius: 14, padding: 14, alignItems: 'center', width: 110, elevation: 2, shadowColor: '#0f4c20', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, gap: 4 },
-  empAvatar: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
+  empAvatar: { width: 48, height: 48, borderRadius: 24 },
+  empAvatarPlaceholder: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
   empAvatarText: { fontSize: 22, fontWeight: '800', color: '#fff' },
   empNombre: { fontSize: 12, fontWeight: '700', color: '#0f4c20' },
   empNegocio: { fontSize: 11, color: '#86a892', textAlign: 'center' },

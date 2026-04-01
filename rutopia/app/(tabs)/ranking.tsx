@@ -1,10 +1,12 @@
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useState } from 'react';
-import { LUGARES, EMPRENDEDORES } from '../../context/AppContext';
+import { router } from 'expo-router';
+import { LUGARES, EMPRENDEDORES, useApp } from '../../context/AppContext';
 
 const MEDALLAS = ['🥇', '🥈', '🥉'];
 
 export default function RankingScreen() {
+  const { t } = useApp();
   const [tab, setTab] = useState<'lugares' | 'emprendedores'>('lugares');
 
   const topLugares = [...LUGARES].sort((a, b) => b.calificacion - a.calificacion).slice(0, 5);
@@ -13,41 +15,74 @@ export default function RankingScreen() {
   return (
     <ScrollView style={s.screen} showsVerticalScrollIndicator={false}>
       <View style={s.hero}>
-        <Text style={s.heroTitle}>🏆 Ranking</Text>
+        <Text style={s.heroTitle}>🏆 {t.ranking}</Text>
         <Text style={s.heroSub}>Los mejores de Sabana Centro</Text>
       </View>
 
+      {/* Tabs */}
       <View style={s.tabs}>
-        <TouchableOpacity style={[s.tabBtn, tab === 'lugares' && s.tabActive]} onPress={() => setTab('lugares')}>
-          <Text style={[s.tabText, tab === 'lugares' && s.tabTextActive]}>🗺️ Lugares</Text>
+        <TouchableOpacity
+          style={[s.tabBtn, tab === 'lugares' && s.tabActive]}
+          onPress={() => setTab('lugares')}
+        >
+          <Text style={[s.tabText, tab === 'lugares' && s.tabTextActive]}>
+            🗺️ {t.explorar}
+          </Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[s.tabBtn, tab === 'emprendedores' && s.tabActive]} onPress={() => setTab('emprendedores')}>
-          <Text style={[s.tabText, tab === 'emprendedores' && s.tabTextActive]}>👥 Emprendedores</Text>
+        <TouchableOpacity
+          style={[s.tabBtn, tab === 'emprendedores' && s.tabActive]}
+          onPress={() => setTab('emprendedores')}
+        >
+          <Text style={[s.tabText, tab === 'emprendedores' && s.tabTextActive]}>
+            👥 {t.emprendedores}
+          </Text>
         </TouchableOpacity>
       </View>
 
+      {/* Lista */}
       <View style={s.list}>
         {(tab === 'lugares' ? topLugares : topEmp).map((item, i) => (
-          <View key={item.id} style={[s.card, i === 0 && s.cardGold]}>
+          <TouchableOpacity
+            key={item.id}
+            style={[s.card, i === 0 && s.cardGold]}
+            onPress={() => tab === 'lugares' && router.push(`/lugar/${item.id}` as any)}
+            activeOpacity={tab === 'lugares' ? 0.85 : 1}
+          >
             <Text style={s.medalla}>{i < 3 ? MEDALLAS[i] : `#${i + 1}`}</Text>
-            <View style={[s.avatar, { backgroundColor: item.color }]}>
-              <Text style={s.avatarText}>
-                {tab === 'lugares' ? (item as any).categoria[0].toUpperCase() : (item as any).nombre[0]}
-              </Text>
-            </View>
+
+            {/* Avatar con imagen si existe */}
+            {item.imagen ? (
+              <Image
+                source={{ uri: item.imagen }}
+                style={s.avatar}
+                resizeMode="cover"
+              />
+            ) : (
+              <View style={[s.avatarPlaceholder, { backgroundColor: item.color }]}>
+                <Text style={s.avatarText}>
+                  {tab === 'lugares'
+                    ? (item as any).categoria[0].toUpperCase()
+                    : (item as any).nombre[0]}
+                </Text>
+              </View>
+            )}
+
             <View style={s.info}>
               <Text style={s.itemNombre} numberOfLines={1}>
                 {tab === 'lugares' ? (item as any).nombre : (item as any).negocio}
               </Text>
               <Text style={s.itemSub}>
-                {tab === 'lugares' ? `📍 ${(item as any).municipio}` : `👤 ${(item as any).nombre}`}
+                {tab === 'lugares'
+                  ? `📍 ${(item as any).municipio}`
+                  : `👤 ${(item as any).nombre}`}
               </Text>
             </View>
+
             <View style={s.ratingBox}>
               <Text style={s.ratingNum}>{item.calificacion}</Text>
               <Text style={s.ratingStar}>⭐</Text>
             </View>
-          </View>
+          </TouchableOpacity>
         ))}
       </View>
       <View style={{ height: 30 }} />
@@ -69,7 +104,8 @@ const s = StyleSheet.create({
   card: { backgroundColor: '#fff', borderRadius: 16, padding: 14, flexDirection: 'row', alignItems: 'center', gap: 12, elevation: 3, shadowColor: '#0f4c20', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8 },
   cardGold: { borderWidth: 2, borderColor: '#fbbf24' },
   medalla: { fontSize: 24, width: 36, textAlign: 'center' },
-  avatar: { width: 46, height: 46, borderRadius: 23, alignItems: 'center', justifyContent: 'center' },
+  avatar: { width: 46, height: 46, borderRadius: 23 },
+  avatarPlaceholder: { width: 46, height: 46, borderRadius: 23, alignItems: 'center', justifyContent: 'center' },
   avatarText: { fontSize: 20, fontWeight: '800', color: '#fff' },
   info: { flex: 1 },
   itemNombre: { fontSize: 15, fontWeight: '700', color: '#0f4c20' },
