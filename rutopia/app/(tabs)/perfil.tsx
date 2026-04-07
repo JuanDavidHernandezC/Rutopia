@@ -79,7 +79,7 @@ export default function PerfilScreen() {
             <Text style={s.acercaText}>Plataforma digital para promover el turismo sostenible en Sabana Centro — Chía, Tabio y Cajicá.</Text>
             <Text style={s.acercaText}>Conectamos viajeros con emprendimientos locales y atractivos culturales de la región.</Text>
             <Text style={[s.acercaText, { fontWeight: '700', color: '#16a34a' }]}>Versión 1.0.0</Text>
-            <Text style={s.acercaText}>Desarrollado con ❤️ en Colombia</Text>
+            <Text style={s.acercaText}>Desarrollado con el ❤️ en Colombia</Text>
             <TouchableOpacity style={s.modalClose} onPress={() => setShowAcerca(false)}>
               <Text style={s.modalCloseText}>Cerrar</Text>
             </TouchableOpacity>

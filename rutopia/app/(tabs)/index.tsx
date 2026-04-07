@@ -47,10 +47,10 @@ export default function HomeScreen() {
 
       {/* Banner publicitario */}
       <View style={s.adBanner}>
-        <Text style={s.adEmoji}>☕</Text>
+        <Text style={s.adEmoji}>📍</Text>
         <View style={s.adInfo}>
           <Text style={s.adLabel}>PUBLICIDAD</Text>
-          <Text style={s.adTitle}>Café de Montaña — Tabio</Text>
+          <Text style={s.adTitle}>Al Carbón — Tabio</Text>
           <Text style={s.adDesc}>Tour + cata de café desde $35.000</Text>
         </View>
         <TouchableOpacity style={s.adBtn} onPress={() => router.push('/lugar/4' as any)}>
@@ -60,7 +60,7 @@ export default function HomeScreen() {
 
       {/* Café destacado */}
       <View style={s.section}>
-        <Text style={s.sectionTitle}>☕ Café destacado del día</Text>
+        <Text style={s.sectionTitle}>⭐ Restaurante destacado del día</Text>
         <TouchableOpacity style={s.featuredCard} onPress={() => router.push('/lugar/4' as any)}>
           {LUGARES[3].imagen ? (
             <Image source={{ uri: LUGARES[3].imagen }} style={s.featuredImg} resizeMode="cover" />
@@ -70,9 +70,9 @@ export default function HomeScreen() {
             </View>
           )}
           <View style={s.featuredBody}>
-            <Text style={s.featuredName}>Café de Montaña</Text>
+            <Text style={s.featuredName}>Restaurante al Carbón</Text>
             <Text style={s.featuredSub}>📍 Tabio · ⭐ 4.9</Text>
-            <Text style={s.featuredDesc}>Recorrido guiado + desayuno campesino</Text>
+            <Text style={s.featuredDesc}>Desayunos y Almuerzos deliciosos</Text>
           </View>
         </TouchableOpacity>
       </View>
