@@ -1,8 +1,14 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Image } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Image, Dimensions, Platform } from 'react-native';
 import { useState, useEffect } from 'react';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { LUGARES, EMPRENDEDORES, useApp } from '../../context/AppContext';
+
+// Importación del logo
+const LogoRutopia = require('../../assets/images/Rutopia.png');
+
+const { width } = Dimensions.get('window');
 
 export default function HomeScreen() {
   const { usuario, t } = useApp();
@@ -10,92 +16,138 @@ export default function HomeScreen() {
   const top3 = [...LUGARES].sort((a, b) => b.calificacion - a.calificacion).slice(0, 3);
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowPromo(true), 1500);
+    const timer = setTimeout(() => setShowPromo(true), 2000);
     return () => clearTimeout(timer);
   }, []);
 
   return (
     <ScrollView style={s.screen} showsVerticalScrollIndicator={false}>
 
-      {/* Pop-up oferta */}
-      <Modal visible={showPromo} transparent animationType="fade">
+      {/* Pop-up Oferta */}
+      <Modal visible={showPromo} transparent animationType="slide">
         <View style={s.modalOverlay}>
           <View style={s.modalBox}>
-            <Text style={s.modalEmoji}>🎉</Text>
-            <Text style={s.modalTitle}>¡Oferta del día!</Text>
-            <Text style={s.modalDesc}>Visita Café de Montaña hoy y obtén{'\n'}un café gratis con tu tour</Text>
-            <TouchableOpacity style={s.modalBtn} onPress={() => { setShowPromo(false); router.push('/lugar/4' as any); }}>
-              <Text style={s.modalBtnText}>Ver oferta →</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setShowPromo(false)}>
-              <Text style={s.modalClose}>Cerrar</Text>
-            </TouchableOpacity>
+            <LinearGradient colors={['#FF6B6B', '#F97316']} style={s.modalGradient}>
+              <View style={s.modalIconCircle}>
+                <Ionicons name="gift" size={40} color="#F97316" />
+              </View>
+              <Text style={s.modalTitle}>¡OFERTA RELÁMPAGO!</Text>
+              <Text style={s.modalDesc}>Visita Café de Montaña hoy y obtén{'\n'}🍵 UN CAFÉ GRATIS 🍵</Text>
+              <TouchableOpacity 
+                style={s.modalBtn} 
+                onPress={() => { setShowPromo(false); router.push('/lugar/4' as any); }}
+              >
+                <Text style={s.modalBtnText}>¡APROVECHAR AHORA! →</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setShowPromo(false)}>
+                <Text style={s.modalClose}>Cerrar</Text>
+              </TouchableOpacity>
+            </LinearGradient>
           </View>
         </View>
       </Modal>
 
-      {/* Hero */}
-      <View style={s.hero}>
-        <Text style={s.heroSub}>Sabana Centro · Colombia</Text>
-        <Text style={s.heroTitle}>{t.hola}, {usuario?.nombre?.split(' ')[0]} 👋</Text>
-        <Text style={s.heroDesc}>{t.dondeVamos}</Text>
-        <TouchableOpacity style={s.searchBtn} onPress={() => router.push('/(tabs)/two' as any)}>
-          <Ionicons name="search" size={16} color="#86a892" />
-          <Text style={s.searchBtnText}>{t.buscar}</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Banner publicitario */}
-      <View style={s.adBanner}>
-        <Text style={s.adEmoji}>📍</Text>
-        <View style={s.adInfo}>
-          <Text style={s.adLabel}>PUBLICIDAD</Text>
-          <Text style={s.adTitle}>Al Carbón — Tabio</Text>
-          <Text style={s.adDesc}>Tour + cata de café desde $35.000</Text>
-        </View>
-        <TouchableOpacity style={s.adBtn} onPress={() => router.push('/lugar/4' as any)}>
-          <Text style={s.adBtnText}>Ver</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Café destacado */}
-      <View style={s.section}>
-        <Text style={s.sectionTitle}>⭐ Restaurante destacado del día</Text>
-        <TouchableOpacity style={s.featuredCard} onPress={() => router.push('/lugar/4' as any)}>
-          {LUGARES[3].imagen ? (
-            <Image source={{ uri: LUGARES[3].imagen }} style={s.featuredImg} resizeMode="cover" />
-          ) : (
-            <View style={[s.featuredImgPlaceholder, { backgroundColor: LUGARES[3].color }]}>
-              <Text style={s.featuredImgText}>CAFÉ</Text>
+      {/* Hero Section - Logo Mejorado */}
+      <LinearGradient 
+        colors={['#007CF0', '#00DFD8']} 
+        start={{x: 0, y: 0}} 
+        end={{x: 1, y: 1}} 
+        style={s.hero}
+      >
+        <View style={s.heroContent}>
+          <View style={s.headerRow}>
+            <View style={{ flex: 1, justifyContent: 'center' }}>
+              <Text style={s.heroSub}>🌎 SABANA CENTRO · COLOMBIA 🇨🇴</Text>
+              <Text style={s.heroTitle}>{t.hola}, {usuario?.nombre?.split(' ')[0]}! 🎒</Text>
             </View>
-          )}
-          <View style={s.featuredBody}>
-            <Text style={s.featuredName}>Restaurante al Carbón</Text>
-            <Text style={s.featuredSub}>📍 Tabio · ⭐ 4.9</Text>
-            <Text style={s.featuredDesc}>Desayunos y Almuerzos deliciosos</Text>
+            
+            {/* Logo estilizado sin fondo cuadrado */}
+            <Image 
+              source={LogoRutopia} 
+              style={s.logoHeader} 
+              resizeMode="contain" 
+            />
           </View>
-        </TouchableOpacity>
-      </View>
-
-      {/* Top 3 */}
-      <View style={s.section}>
-        <View style={s.rowBetween}>
-          <Text style={s.sectionTitle}>🏆 {t.ranking}</Text>
-          <TouchableOpacity onPress={() => router.push('/(tabs)/ranking' as any)}>
-            <Text style={s.verTodos}>Ver ranking →</Text>
+          
+          <Text style={s.heroDesc}>{t.dondeVamos}</Text>
+          
+          <TouchableOpacity style={s.searchBar} onPress={() => router.push('/(tabs)/two' as any)}>
+            <Ionicons name="search-outline" size={20} color="#007CF0" />
+            <Text style={s.searchBarText}>{t.buscar}</Text>
           </TouchableOpacity>
         </View>
+      </LinearGradient>
+
+      {/* Banner Publicitario */}
+      <View style={s.adBanner}>
+        <View style={s.adBadge}>
+          <Text style={s.adBadgeText}>⭐ PATROCINADO</Text>
+        </View>
+        <View style={s.adRow}>
+          <View style={s.adTextContainer}>
+            <Text style={s.adTitle}>🎯 AL CARBÓN — TABIO</Text>
+            <Text style={s.adDesc}>Tour + cata de café desde $35.000</Text>
+            <Text style={s.adPromo}>🚨 2x1 en postres hoy 🚨</Text>
+          </View>
+          <TouchableOpacity style={s.adBtn} onPress={() => router.push('/lugar/4' as any)}>
+            <Text style={s.adBtnText}>VER →</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Restaurante destacado */}
+      <View style={s.section}>
+        <View style={s.sectionHeader}>
+          <Ionicons name="star" size={22} color="#FBBF24" />
+          <Text style={s.sectionTitle}>DESTACADO DEL DÍA</Text>
+        </View>
+        <TouchableOpacity style={s.featuredCard} onPress={() => router.push('/lugar/4' as any)}>
+          {LUGARES[3].imagen ? (
+            <Image source={{ uri: LUGARES[3].imagen }} style={s.featuredImg} />
+          ) : (
+            <LinearGradient colors={['#F97316', '#F59E0B']} style={s.featuredImgPlaceholder}>
+              <Text style={s.featuredImgText}>🔥 CAFÉ 🔥</Text>
+            </LinearGradient>
+          )}
+          <div style={s.featuredBody}>
+            <Text style={s.featuredName}>Restaurante al Carbón</Text>
+            <View style={s.featuredRow}>
+              <Text style={s.featuredLocation}>📍 Tabio</Text>
+              <View style={s.ratingBadge}>
+                <Text style={s.ratingText}>⭐ 4.9</Text>
+              </View>
+            </View>
+          </div>
+        </TouchableOpacity>
+      </View>
+
+      {/* Top 3 Ranking */}
+      <View style={s.section}>
+        <View style={s.rowBetween}>
+          <View style={s.sectionHeader}>
+            <Ionicons name="trophy" size={22} color="#007CF0" />
+            <Text style={s.sectionTitle}>{t.ranking}</Text>
+          </View>
+          <TouchableOpacity style={s.verTodosBtn} onPress={() => router.push('/(tabs)/ranking' as any)}>
+            <Text style={s.verTodos}>Ver todos</Text>
+          </TouchableOpacity>
+        </View>
+        
         {top3.map((lugar, i) => (
           <TouchableOpacity
             key={lugar.id}
             style={s.topCard}
             onPress={() => router.push(`/lugar/${lugar.id}` as any)}
-            activeOpacity={0.9}
+            activeOpacity={0.8}
           >
-            <Text style={s.topMedal}>{['🥇','🥈','🥉'][i]}</Text>
-            <View style={[s.topDot, { backgroundColor: lugar.color }]} />
-            <Text style={s.topNombre} numberOfLines={1}>{lugar.nombre}</Text>
-            <Text style={s.topRating}>⭐ {lugar.calificacion}</Text>
+            <Text style={s.topMedal}>{['🥇', '🥈', '🥉'][i]}</Text>
+            <View style={s.topInfo}>
+               <Text style={s.topNombre} numberOfLines={1}>{lugar.nombre}</Text>
+               <Text style={s.topLoc}>Explorar destino</Text>
+            </View>
+            <View style={s.topRatingContainer}>
+              <Text style={s.topRating}>⭐ {lugar.calificacion}</Text>
+            </View>
           </TouchableOpacity>
         ))}
       </View>
@@ -103,80 +155,113 @@ export default function HomeScreen() {
       {/* Emprendedores */}
       <View style={s.section}>
         <View style={s.rowBetween}>
-          <Text style={s.sectionTitle}>👥 {t.emprendedores}</Text>
-          <TouchableOpacity onPress={() => router.push('/(tabs)/emprendedores' as any)}>
-            <Text style={s.verTodos}>Ver todos →</Text>
+          <View style={s.sectionHeader}>
+            <Ionicons name="people" size={22} color="#00DFD8" />
+            <Text style={s.sectionTitle}>{t.emprendedores}</Text>
+          </View>
+          <TouchableOpacity style={s.verTodosBtn} onPress={() => router.push('/(tabs)/emprendedores' as any)}>
+            <Text style={s.verTodos}>Ver todos</Text>
           </TouchableOpacity>
         </View>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12 }}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.empList}>
           {EMPRENDEDORES.slice(0, 4).map(e => (
-            <View key={e.id} style={s.empCard}>
+            <TouchableOpacity key={e.id} style={s.empCard} activeOpacity={0.9}>
               {e.imagen ? (
                 <Image source={{ uri: e.imagen }} style={s.empAvatar} />
               ) : (
-                <View style={[s.empAvatarPlaceholder, { backgroundColor: e.color }]}>
+                <LinearGradient colors={[e.color, e.color + 'CC']} style={s.empAvatarPlaceholder}>
                   <Text style={s.empAvatarText}>{e.nombre[0]}</Text>
-                </View>
+                </LinearGradient>
               )}
               <Text style={s.empNombre} numberOfLines={1}>{e.nombre.split(' ')[0]}</Text>
               <Text style={s.empNegocio} numberOfLines={1}>{e.negocio}</Text>
-              <Text style={s.empRating}>⭐ {e.calificacion}</Text>
-            </View>
+              <View style={s.empRatingContainer}>
+                <Text style={s.empRating}>⭐ {e.calificacion}</Text>
+              </View>
+            </TouchableOpacity>
           ))}
         </ScrollView>
       </View>
 
-      <View style={{ height: 30 }} />
+      <View style={{ height: 100 }} />
     </ScrollView>
   );
 }
 
 const s = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: '#f0fdf4' },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', alignItems: 'center', justifyContent: 'center' },
-  modalBox: { backgroundColor: '#fff', borderRadius: 24, padding: 28, alignItems: 'center', width: '80%', gap: 10 },
-  modalEmoji: { fontSize: 40 },
-  modalTitle: { fontSize: 22, fontWeight: '800', color: '#0f4c20' },
-  modalDesc: { fontSize: 14, color: '#4b7c5a', textAlign: 'center', lineHeight: 20 },
-  modalBtn: { backgroundColor: '#16a34a', paddingHorizontal: 28, paddingVertical: 12, borderRadius: 20, marginTop: 6 },
-  modalBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
-  modalClose: { color: '#86a892', fontSize: 13, marginTop: 4 },
-  hero: { backgroundColor: '#0a2e12', paddingTop: 50, paddingBottom: 28, paddingHorizontal: 20, borderBottomLeftRadius: 28, borderBottomRightRadius: 28, gap: 4 },
-  heroSub: { fontSize: 11, color: '#4ade80', letterSpacing: 2, textTransform: 'uppercase' },
-  heroTitle: { fontSize: 28, fontWeight: '800', color: '#f0fdf4' },
-  heroDesc: { fontSize: 16, color: '#86a892', marginBottom: 12 },
-  searchBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#1a5c2a', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, gap: 8 },
-  searchBtnText: { color: '#86a892', fontSize: 14 },
-  adBanner: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fef9c3', margin: 16, borderRadius: 14, padding: 12, gap: 10, borderWidth: 1, borderColor: '#fbbf24' },
-  adEmoji: { fontSize: 28 },
-  adInfo: { flex: 1 },
-  adLabel: { fontSize: 9, fontWeight: '700', color: '#86a892', letterSpacing: 1 },
-  adTitle: { fontSize: 13, fontWeight: '700', color: '#0f4c20' },
-  adDesc: { fontSize: 12, color: '#4b7c5a' },
-  adBtn: { backgroundColor: '#fbbf24', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10 },
-  adBtnText: { fontSize: 13, fontWeight: '700', color: '#0a2e12' },
-  section: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 4 },
-  sectionTitle: { fontSize: 17, fontWeight: '700', color: '#0f4c20', marginBottom: 10 },
-  rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
-  verTodos: { fontSize: 13, color: '#16a34a', fontWeight: '600' },
-  featuredCard: { backgroundColor: '#fff', borderRadius: 16, flexDirection: 'row', overflow: 'hidden', elevation: 3, shadowColor: '#0f4c20', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8 },
-  featuredImg: { width: 100, height: 90 },
-  featuredImgPlaceholder: { width: 100, alignItems: 'center', justifyContent: 'center', height: 90 },
-  featuredImgText: { color: '#fff', fontWeight: '700', fontSize: 12 },
-  featuredBody: { flex: 1, padding: 14, gap: 4 },
-  featuredName: { fontSize: 16, fontWeight: '700', color: '#0f4c20' },
-  featuredSub: { fontSize: 13, color: '#4b7c5a' },
-  featuredDesc: { fontSize: 12, color: '#86a892' },
-  topCard: { backgroundColor: '#fff', borderRadius: 12, padding: 12, flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8, elevation: 2, shadowColor: '#0f4c20', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4 },
-  topMedal: { fontSize: 20 },
-  topDot: { width: 10, height: 10, borderRadius: 5 },
-  topNombre: { flex: 1, fontSize: 14, fontWeight: '600', color: '#0f4c20' },
-  topRating: { fontSize: 13, fontWeight: '700', color: '#0f4c20' },
-  empCard: { backgroundColor: '#fff', borderRadius: 14, padding: 14, alignItems: 'center', width: 110, elevation: 2, shadowColor: '#0f4c20', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, gap: 4 },
-  empAvatar: { width: 48, height: 48, borderRadius: 24 },
-  empAvatarPlaceholder: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
-  empAvatarText: { fontSize: 22, fontWeight: '800', color: '#fff' },
-  empNombre: { fontSize: 12, fontWeight: '700', color: '#0f4c20' },
-  empNegocio: { fontSize: 11, color: '#86a892', textAlign: 'center' },
-  empRating: { fontSize: 12, fontWeight: '600', color: '#0f4c20' },
+  screen: { flex: 1, backgroundColor: '#F8FAFC' },
+  
+  // MODAL
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(15, 23, 42, 0.85)', alignItems: 'center', justifyContent: 'center' },
+  modalBox: { borderRadius: 30, width: '85%', overflow: 'hidden', elevation: 20 },
+  modalGradient: { padding: 30, alignItems: 'center' },
+  modalIconCircle: { width: 70, height: 70, borderRadius: 35, backgroundColor: 'white', justifyContent: 'center', alignItems: 'center', marginBottom: 20 },
+  modalTitle: { fontSize: 22, fontWeight: '900', color: '#FFFFFF', textAlign: 'center' },
+  modalDesc: { fontSize: 16, color: '#FFFFFF', textAlign: 'center', marginVertical: 15, fontWeight: '600', lineHeight: 22 },
+  modalBtn: { backgroundColor: '#FFFFFF', paddingHorizontal: 25, paddingVertical: 14, borderRadius: 15, shadowOpacity: 0.2 },
+  modalBtnText: { color: '#F97316', fontWeight: '800', fontSize: 15 },
+  modalClose: { color: '#FFFFFF', fontSize: 14, marginTop: 20, fontWeight: '500', opacity: 0.8 },
+  
+  // HERO - LOGO AJUSTADO
+  hero: { paddingTop: 60, paddingBottom: 35, paddingHorizontal: 25, borderBottomLeftRadius: 40, borderBottomRightRadius: 40, elevation: 10 },
+  heroContent: { gap: 2 },
+  headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 },
+  logoHeader: { width: 85, height: 85, marginTop: -10 }, // Tamaño ajustado y un poco hacia arriba para equilibrar
+  heroSub: { fontSize: 11, color: '#FFFFFF', letterSpacing: 1.2, fontWeight: '800', opacity: 0.9, marginBottom: 4 },
+  heroTitle: { fontSize: 28, fontWeight: '900', color: '#FFFFFF', lineHeight: 32 },
+  heroDesc: { fontSize: 16, color: '#FFFFFF', marginBottom: 18, opacity: 0.9, fontWeight: '500' },
+  searchBar: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', borderRadius: 20, paddingHorizontal: 18, paddingVertical: 14, gap: 10, elevation: 5 },
+  searchBarText: { color: '#64748B', fontSize: 15, fontWeight: '600' },
+  
+  // AD BANNER
+  adBanner: { backgroundColor: '#FFFFFF', margin: 25, borderRadius: 25, padding: 20, elevation: 8, borderLeftWidth: 8, borderLeftColor: '#FBBF24' },
+  adBadge: { marginBottom: 8 },
+  adBadgeText: { color: '#F59E0B', fontSize: 10, fontWeight: '900', letterSpacing: 0.5 },
+  adRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  adTextContainer: { flex: 1 },
+  adTitle: { fontSize: 17, fontWeight: '800', color: '#1E293B' },
+  adDesc: { fontSize: 13, color: '#64748B', marginTop: 2 },
+  adPromo: { fontSize: 12, color: '#EF4444', fontWeight: '700', marginTop: 4 },
+  adBtn: { backgroundColor: '#1E293B', paddingHorizontal: 15, paddingVertical: 10, borderRadius: 12 },
+  adBtnText: { fontSize: 12, fontWeight: '800', color: '#FFFFFF' },
+  
+  // SECTIONS
+  section: { paddingHorizontal: 25, marginTop: 10, marginBottom: 20 },
+  sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 15 },
+  sectionTitle: { fontSize: 18, fontWeight: '900', color: '#1E293B' },
+  rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  verTodosBtn: { backgroundColor: '#E0F2FE', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 10 },
+  verTodos: { fontSize: 12, color: '#007CF0', fontWeight: '800' },
+  
+  // FEATURED CARD
+  featuredCard: { backgroundColor: '#FFFFFF', borderRadius: 25, overflow: 'hidden', elevation: 5 },
+  featuredImg: { width: '100%', height: 160 },
+  featuredImgPlaceholder: { width: '100%', height: 160, alignItems: 'center', justifyContent: 'center' },
+  featuredImgText: { color: '#FFFFFF', fontWeight: '900', fontSize: 20 },
+  featuredBody: { padding: 18, gap: 6 },
+  featuredName: { fontSize: 19, fontWeight: '800', color: '#1E293B' },
+  featuredRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  featuredLocation: { fontSize: 14, color: '#007CF0', fontWeight: '700' },
+  ratingBadge: { backgroundColor: '#FFFBEB', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
+  ratingText: { fontSize: 12, fontWeight: '800', color: '#F59E0B' },
+  
+  // TOP RANKING
+  topCard: { backgroundColor: '#FFFFFF', borderRadius: 20, padding: 15, flexDirection: 'row', alignItems: 'center', gap: 15, marginBottom: 12, elevation: 3 },
+  topMedal: { fontSize: 26 },
+  topInfo: { flex: 1 },
+  topNombre: { fontSize: 16, fontWeight: '800', color: '#1E293B' },
+  topLoc: { fontSize: 12, color: '#94A3B8', fontWeight: '500' },
+  topRatingContainer: { backgroundColor: '#F8FAFC', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12, borderWidth: 1, borderColor: '#F1F5F9' },
+  topRating: { fontSize: 13, fontWeight: '800', color: '#F59E0B' },
+  
+  // EMPRENDEDORES
+  empList: { paddingRight: 25, gap: 15 },
+  empCard: { backgroundColor: '#FFFFFF', borderRadius: 22, padding: 15, alignItems: 'center', width: 130, elevation: 4, borderBottomWidth: 4, borderBottomColor: '#00DFD8' },
+  empAvatar: { width: 65, height: 65, borderRadius: 32 },
+  empAvatarPlaceholder: { width: 65, height: 65, borderRadius: 32, alignItems: 'center', justifyContent: 'center' },
+  empAvatarText: { fontSize: 24, fontWeight: '900', color: '#FFFFFF' },
+  empNombre: { fontSize: 14, fontWeight: '800', color: '#1E293B', marginTop: 5 },
+  empNegocio: { fontSize: 11, color: '#007CF0', fontWeight: '700' },
+  empRatingContainer: { backgroundColor: '#FFFBEB', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10, marginTop: 8 },
+  empRating: { fontSize: 11, fontWeight: '800', color: '#F59E0B' },
 });
