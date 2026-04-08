@@ -1,23 +1,25 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useApp, LUGARES } from '../../context/AppContext';
 
 export default function FavoritosScreen() {
-  const { favoritos, toggleFavorito, usuario } = useApp();
+  const { favoritos, toggleFavorito, usuario, t } = useApp();
   const lugares = LUGARES.filter(l => favoritos.includes(l.id));
   const isPremium = usuario?.plan === 'premium';
 
   return (
     <ScrollView style={s.screen} showsVerticalScrollIndicator={false}>
       <View style={s.hero}>
-        <Text style={s.heroTitle}>Mis Favoritos</Text>
-        <Text style={s.heroSub}>{favoritos.length} {isPremium ? '∞' : `/ 5`} lugares guardados</Text>
+        <Text style={s.heroTitle}>{t.favoritos}</Text>
+        <Text style={s.heroSub}>
+          {favoritos.length} {isPremium ? '∞' : '/ 5'} {t.favoritos.toLowerCase()} guardados
+        </Text>
       </View>
 
       {!isPremium && (
-        <TouchableOpacity style={s.premiumBanner}>
-          <Text style={s.premiumText}>✨ Actualiza a Premium — favoritos ilimitados</Text>
+        <TouchableOpacity style={s.premiumBanner} onPress={() => router.push('/planes' as any)}>
+          <Text style={s.premiumText}>✨ {t.premium}</Text>
         </TouchableOpacity>
       )}
 
@@ -25,29 +27,45 @@ export default function FavoritosScreen() {
         {lugares.length === 0 ? (
           <View style={s.empty}>
             <Text style={{ fontSize: 50 }}>💚</Text>
-            <Text style={s.emptyTitle}>Sin favoritos aún</Text>
+            <Text style={s.emptyTitle}>{t.favoritos}</Text>
             <Text style={s.emptyDesc}>Explora lugares y guarda los que más te gusten</Text>
             <TouchableOpacity style={s.btnExplorar} onPress={() => router.push('/(tabs)/two' as any)}>
-              <Text style={s.btnExplorarText}>Explorar lugares</Text>
+              <Text style={s.btnExplorarText}>{t.explorar}</Text>
             </TouchableOpacity>
           </View>
         ) : (
           lugares.map(lugar => (
-            <TouchableOpacity key={lugar.id} style={s.card} onPress={() => router.push(`/lugar/${lugar.id}` as any)} activeOpacity={0.9}>
-              <View style={[s.cardImg, { backgroundColor: lugar.color }]}>
-                <Text style={s.cardImgText}>{lugar.categoria.toUpperCase()}</Text>
-              </View>
+            <TouchableOpacity
+              key={lugar.id}
+              style={s.card}
+              onPress={() => router.push(`/lugar/${lugar.id}` as any)}
+              activeOpacity={0.9}
+            >
+              {lugar.imagen ? (
+                <Image source={{ uri: lugar.imagen }} style={s.cardImg} resizeMode="cover" />
+              ) : (
+                <View style={[s.cardImgPlaceholder, { backgroundColor: lugar.color }]}>
+                  <Text style={s.cardImgText}>{lugar.categoria.toUpperCase()}</Text>
+                </View>
+              )}
               <View style={s.cardBody}>
                 <Text style={s.cardName}>{lugar.nombre}</Text>
                 <Text style={s.cardMun}>📍 {lugar.municipio} · 🚗 {lugar.distancia}</Text>
                 <Text style={s.cardRating}>⭐ {lugar.calificacion}</Text>
               </View>
-              <TouchableOpacity style={s.deleteBtn} onPress={() => {
-                Alert.alert('Eliminar favorito', `¿Quitar "${lugar.nombre}" de favoritos?`, [
-                  { text: 'Cancelar', style: 'cancel' },
-                  { text: 'Eliminar', style: 'destructive', onPress: () => toggleFavorito(lugar.id) },
-                ]);
-              }}>
+              <TouchableOpacity
+                style={s.deleteBtn}
+                onPress={() => {
+                  Alert.alert(
+                    'Eliminar favorito',
+                    `¿Quitar "${lugar.nombre}" de ${t.favoritos.toLowerCase()}?`,
+                    [
+                      { text: 'Cancelar', style: 'cancel' },
+                      { text: 'Eliminar', style: 'destructive', onPress: () => toggleFavorito(lugar.id) },
+                    ]
+                  );
+                }}
+              >
                 <Ionicons name="trash-outline" size={20} color="#dc2626" />
               </TouchableOpacity>
             </TouchableOpacity>
@@ -73,7 +91,8 @@ const s = StyleSheet.create({
   btnExplorar: { backgroundColor: '#16a34a', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 20, marginTop: 8 },
   btnExplorarText: { color: '#fff', fontWeight: '700', fontSize: 15 },
   card: { backgroundColor: '#fff', borderRadius: 16, flexDirection: 'row', overflow: 'hidden', elevation: 3, shadowColor: '#0f4c20', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8 },
-  cardImg: { width: 90, alignItems: 'center', justifyContent: 'center' },
+  cardImg: { width: 90, height: 90 },
+  cardImgPlaceholder: { width: 90, height: 90, alignItems: 'center', justifyContent: 'center' },
   cardImgText: { color: '#fff', fontSize: 10, fontWeight: '700', textAlign: 'center', padding: 4 },
   cardBody: { flex: 1, padding: 12, gap: 4 },
   cardName: { fontSize: 15, fontWeight: '700', color: '#0f4c20' },

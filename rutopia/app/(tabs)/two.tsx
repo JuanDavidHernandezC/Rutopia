@@ -1,16 +1,23 @@
 import { useState } from 'react';
-import { View, Text, ScrollView, TextInput, TouchableOpacity, StyleSheet, Linking, Alert } from 'react-native';
+import { View, Text, ScrollView, TextInput, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LUGARES, useApp } from '../../context/AppContext';
 
 const CATS = ['Todos', 'ecoturismo', 'gastronomia', 'cafes', 'cultura'];
-const CAT_LABEL: Record<string, string> = { Todos: 'Todos', ecoturismo: '🌿 Eco', gastronomia: '🍽️ Gastro', cafes: '☕ Cafés', cultura: '🎭 Cultura' };
 
 export default function ExplorarScreen() {
-  const { esFavorito, toggleFavorito, favoritos, usuario } = useApp();
+  const { esFavorito, toggleFavorito, favoritos, usuario, t } = useApp();
   const [busqueda, setBusqueda] = useState('');
   const [catActiva, setCatActiva] = useState('Todos');
+
+  const CAT_LABEL: Record<string, string> = {
+    Todos: t.explorar === 'Explore' ? 'All' : t.explorar === 'Explorer' ? 'Tous' : t.explorar === 'Explorar' && t.inicio === 'Início' ? 'Todos' : 'Todos',
+    ecoturismo: '🌿 Eco',
+    gastronomia: '🍽️ Gastro',
+    cafes: '☕ Cafés',
+    cultura: '🎭 Cultura',
+  };
 
   const filtrados = LUGARES.filter(l => {
     const matchBusqueda = l.nombre.toLowerCase().includes(busqueda.toLowerCase()) || l.categoria.includes(busqueda.toLowerCase());
@@ -21,7 +28,8 @@ export default function ExplorarScreen() {
   const handleFav = (id: string) => {
     if (!esFavorito(id) && favoritos.length >= 5 && usuario?.plan === 'gratuito') {
       Alert.alert('Límite alcanzado', '¿Quieres favoritos ilimitados?\nActualiza a Premium 🌟', [
-        { text: 'Ahora no' }, { text: '¡Quiero Premium!', style: 'default' }
+        { text: 'Ahora no' },
+        { text: '¡Quiero Premium!', onPress: () => router.push('/planes' as any) },
       ]);
       return;
     }
@@ -33,15 +41,36 @@ export default function ExplorarScreen() {
       {/* Búsqueda */}
       <View style={s.searchWrap}>
         <Ionicons name="search" size={18} color="#86a892" />
-        <TextInput style={s.searchInput} placeholder="Buscar lugares..." placeholderTextColor="#86a892" value={busqueda} onChangeText={setBusqueda} />
-        {busqueda.length > 0 && <TouchableOpacity onPress={() => setBusqueda('')}><Ionicons name="close-circle" size={18} color="#86a892" /></TouchableOpacity>}
+        <TextInput
+          style={s.searchInput}
+          placeholder={t.buscar}
+          placeholderTextColor="#86a892"
+          value={busqueda}
+          onChangeText={setBusqueda}
+        />
+        {busqueda.length > 0 && (
+          <TouchableOpacity onPress={() => setBusqueda('')}>
+            <Ionicons name="close-circle" size={18} color="#86a892" />
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Categorías */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.catsRow} contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={s.catsRow}
+        contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}
+      >
         {CATS.map(cat => (
-          <TouchableOpacity key={cat} style={[s.chip, catActiva === cat && s.chipActive]} onPress={() => setCatActiva(cat)}>
-            <Text style={[s.chipText, catActiva === cat && s.chipTextActive]}>{CAT_LABEL[cat]}</Text>
+          <TouchableOpacity
+            key={cat}
+            style={[s.chip, catActiva === cat && s.chipActive]}
+            onPress={() => setCatActiva(cat)}
+          >
+            <Text style={[s.chipText, catActiva === cat && s.chipTextActive]}>
+              {CAT_LABEL[cat]}
+            </Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
@@ -49,18 +78,41 @@ export default function ExplorarScreen() {
       {/* Lista */}
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 16, gap: 14 }}>
         {filtrados.map(lugar => (
-          <TouchableOpacity key={lugar.id} style={s.card} onPress={() => router.push(`/lugar/${lugar.id}` as any)} activeOpacity={0.92}>
-            {lugar.patrocinado && (
-              <View style={s.sponsorBadge}><Text style={s.sponsorText}>⭐ Patrocinado</Text></View>
-            )}
-            <View style={[s.cardImg, { backgroundColor: lugar.color }]}>
-              <Text style={s.cardImgText}>{lugar.categoria.toUpperCase()}</Text>
+          <TouchableOpacity
+            key={lugar.id}
+            style={s.card}
+            onPress={() => router.push(`/lugar/${lugar.id}` as any)}
+            activeOpacity={0.92}
+          >
+            {/* Imagen o color */}
+            <View style={s.cardImgWrap}>
+              {lugar.imagen ? (
+                <Image
+                  source={{ uri: lugar.imagen }}
+                  style={s.cardImg}
+                  resizeMode="cover"
+                />
+              ) : (
+                <View style={[s.cardImgPlaceholder, { backgroundColor: lugar.color }]}>
+                  <Text style={s.cardImgText}>{lugar.categoria.toUpperCase()}</Text>
+                </View>
+              )}
+              {lugar.patrocinado && (
+                <View style={s.sponsorBadge}>
+                  <Text style={s.sponsorText}>⭐ Patrocinado</Text>
+                </View>
+              )}
             </View>
+
             <View style={s.cardBody}>
               <View style={s.cardRow}>
                 <Text style={s.cardName} numberOfLines={1}>{lugar.nombre}</Text>
                 <TouchableOpacity onPress={() => handleFav(lugar.id)}>
-                  <Ionicons name={esFavorito(lugar.id) ? 'heart' : 'heart-outline'} size={22} color={esFavorito(lugar.id) ? '#dc2626' : '#86a892'} />
+                  <Ionicons
+                    name={esFavorito(lugar.id) ? 'heart' : 'heart-outline'}
+                    size={22}
+                    color={esFavorito(lugar.id) ? '#dc2626' : '#86a892'}
+                  />
                 </TouchableOpacity>
               </View>
               <View style={s.cardRow}>
@@ -74,6 +126,7 @@ export default function ExplorarScreen() {
             </View>
           </TouchableOpacity>
         ))}
+
         {filtrados.length === 0 && (
           <View style={s.empty}>
             <Text style={{ fontSize: 40 }}>🔍</Text>
@@ -96,10 +149,12 @@ const s = StyleSheet.create({
   chipText: { fontSize: 13, color: '#4b7c5a', fontWeight: '600' },
   chipTextActive: { color: '#fff' },
   card: { backgroundColor: '#fff', borderRadius: 16, overflow: 'hidden', elevation: 3, shadowColor: '#0f4c20', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8 },
-  sponsorBadge: { position: 'absolute', top: 10, left: 10, zIndex: 1, backgroundColor: '#fbbf24', borderRadius: 10, paddingHorizontal: 8, paddingVertical: 3 },
-  sponsorText: { fontSize: 11, fontWeight: '700', color: '#0a2e12' },
-  cardImg: { height: 130, alignItems: 'center', justifyContent: 'center' },
+  cardImgWrap: { position: 'relative' },
+  cardImg: { width: '100%', height: 150 },
+  cardImgPlaceholder: { height: 150, alignItems: 'center', justifyContent: 'center' },
   cardImgText: { color: '#fff', fontWeight: '700', fontSize: 15, letterSpacing: 1 },
+  sponsorBadge: { position: 'absolute', top: 10, left: 10, backgroundColor: '#fbbf24', borderRadius: 10, paddingHorizontal: 8, paddingVertical: 3 },
+  sponsorText: { fontSize: 11, fontWeight: '700', color: '#0a2e12' },
   cardBody: { padding: 14, gap: 6 },
   cardRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   cardName: { fontSize: 16, fontWeight: '700', color: '#0f4c20', flex: 1 },

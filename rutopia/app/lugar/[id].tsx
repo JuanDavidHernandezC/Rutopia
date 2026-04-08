@@ -1,17 +1,38 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Linking, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Linking, Alert, TextInput } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LUGARES, useApp } from '../../context/AppContext';
+import { useState } from 'react';
+import { ImageBackground } from 'react-native';
 
 export default function LugarDetalle() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { esFavorito, toggleFavorito, favoritos, usuario } = useApp();
+  const { esFavorito, toggleFavorito, favoritos, usuario, agregarResena, getResenasPorLugar, t } = useApp();
   const lugar = LUGARES.find(l => l.id === id);
+  const [estrellas, setEstrellas] = useState(5);
+  const [textoResena, setTextoResena] = useState('');
+
+  const resenasGuardadas = lugar ? getResenasPorLugar(lugar.id) : [];
+  const resenasIniciales = [
+    { id:'0', lugarId: id ?? '', usuario:'Laura M.', texto:'¡Un lugar increíble! La vista es espectacular.', estrellas:5, fecha:'15/03/2026' },
+    { id:'00', lugarId: id ?? '', usuario:'Andrés P.', texto:'Muy bien cuidado, ideal para familia.', estrellas:4, fecha:'20/03/2026' },
+  ];
+  const todasResenas = [...resenasGuardadas, ...resenasIniciales];
+
+  const handlePublicar = () => {
+    if (!textoResena.trim()) { Alert.alert('Escribe algo antes de publicar'); return; }
+    agregarResena({ lugarId: lugar!.id, texto: textoResena.trim(), estrellas });
+    setTextoResena('');
+    setEstrellas(5);
+    Alert.alert('✅ ¡Reseña publicada!', 'Gracias por tu opinión.');
+  };
 
   if (!lugar) return (
     <View style={s.notFound}>
       <Text style={s.notFoundText}>Lugar no encontrado</Text>
-      <TouchableOpacity onPress={() => router.back()}><Text style={s.back}>← Volver</Text></TouchableOpacity>
+      <TouchableOpacity onPress={() => router.back()}>
+        <Text style={s.back}>← Volver</Text>
+      </TouchableOpacity>
     </View>
   );
 
@@ -20,7 +41,8 @@ export default function LugarDetalle() {
   const handleFav = () => {
     if (!fav && favoritos.length >= 5 && usuario?.plan === 'gratuito') {
       Alert.alert('Límite alcanzado', '¿Quieres favoritos ilimitados?\nActualiza a Premium 🌟', [
-        { text: 'Ahora no' }, { text: '¡Quiero Premium!' }
+        { text: 'Ahora no' },
+        { text: '¡Quiero Premium!', onPress: () => router.push('/planes' as any) },
       ]);
       return;
     }
@@ -34,7 +56,8 @@ export default function LugarDetalle() {
 
   return (
     <ScrollView style={s.screen} showsVerticalScrollIndicator={false}>
-      {/* Imagen hero */}
+
+      {/* Hero */}
       <View style={[s.hero, { backgroundColor: lugar.color }]}>
         <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={22} color="#fff" />
@@ -55,6 +78,7 @@ export default function LugarDetalle() {
       </View>
 
       <View style={s.body}>
+
         {/* Info principal */}
         <View style={s.mainInfo}>
           <Text style={s.nombre}>{lugar.nombre}</Text>
@@ -83,35 +107,66 @@ export default function LugarDetalle() {
         <View style={s.actionsRow}>
           <TouchableOpacity style={s.btnMapa} onPress={abrirMapa}>
             <Ionicons name="map" size={20} color="#fff" />
-            <Text style={s.btnMapaText}>Ver en Google Maps</Text>
+            <Text style={s.btnMapaText}>{t.verMapa}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[s.btnFav, fav && s.btnFavActive]} onPress={handleFav}>
             <Ionicons name={fav ? 'heart' : 'heart-outline'} size={20} color={fav ? '#dc2626' : '#16a34a'} />
             <Text style={[s.btnFavText, fav && { color: '#dc2626' }]}>
-              {fav ? 'Guardado' : 'Guardar'}
+              {fav ? t.guardado : t.guardar}
             </Text>
           </TouchableOpacity>
         </View>
 
-        {/* Reseñas simuladas */}
+        {/* Reseñas */}
         <View style={s.card}>
-          <Text style={s.cardTitle}>💬 Reseñas destacadas</Text>
-          {[
-            { user: 'Laura M.', texto: '¡Un lugar increíble! La vista es espectacular.', stars: 5 },
-            { user: 'Andrés P.', texto: 'Muy bien cuidado, ideal para familia.', stars: 4 },
-          ].map((r, i) => (
-            <View key={i} style={s.review}>
-              <View style={s.reviewHeader}>
-                <View style={s.reviewAvatar}>
-                  <Text style={s.reviewAvatarText}>{r.user[0]}</Text>
-                </View>
-                <Text style={s.reviewUser}>{r.user}</Text>
-                <Text style={s.reviewStars}>{'⭐'.repeat(r.stars)}</Text>
-              </View>
-              <Text style={s.reviewText}>{r.texto}</Text>
+          <Text style={s.cardTitle}>💬 {t.reseñas}</Text>
+
+          {/* Formulario nueva reseña */}
+          <View style={s.resenaForm}>
+            <Text style={s.resenaFormTitle}>{t.tuResena}</Text>
+            <View style={s.starsRow}>
+              {[1,2,3,4,5].map(star => (
+                <TouchableOpacity key={star} onPress={() => setEstrellas(star)}>
+                  <Text style={{ fontSize: 28 }}>{star <= estrellas ? '⭐' : '☆'}</Text>
+                </TouchableOpacity>
+              ))}
             </View>
-          ))}
+            <TextInput
+              style={s.resenaInput}
+              placeholder={t.escribeResena}
+              placeholderTextColor="#86a892"
+              value={textoResena}
+              onChangeText={setTextoResena}
+              multiline
+              numberOfLines={3}
+            />
+            <TouchableOpacity style={s.resenaBtn} onPress={handlePublicar}>
+              <Text style={s.resenaBtnText}>{t.publicar}</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Lista reseñas */}
+          {todasResenas.length === 0 ? (
+            <Text style={s.sinResenas}>Sé el primero en dejar una reseña</Text>
+          ) : (
+            todasResenas.map((r, i) => (
+              <View key={i} style={s.review}>
+                <View style={s.reviewHeader}>
+                  <View style={s.reviewAvatar}>
+                    <Text style={s.reviewAvatarText}>{r.usuario[0]}</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={s.reviewUser}>{r.usuario}</Text>
+                    <Text style={s.reviewFecha}>{r.fecha}</Text>
+                  </View>
+                  <Text style={s.reviewStars}>{'⭐'.repeat(r.estrellas)}</Text>
+                </View>
+                <Text style={s.reviewText}>{r.texto}</Text>
+              </View>
+            ))
+          )}
         </View>
+
       </View>
       <View style={{ height: 40 }} />
     </ScrollView>
@@ -149,11 +204,19 @@ const s = StyleSheet.create({
   btnFav: { flex: 1, backgroundColor: '#d1fae5', borderRadius: 14, padding: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
   btnFavActive: { backgroundColor: '#fee2e2' },
   btnFavText: { color: '#16a34a', fontWeight: '700', fontSize: 14 },
+  resenaForm: { backgroundColor: '#f0fdf4', borderRadius: 12, padding: 14, gap: 10 },
+  resenaFormTitle: { fontSize: 14, fontWeight: '700', color: '#0f4c20' },
+  starsRow: { flexDirection: 'row', gap: 4 },
+  resenaInput: { backgroundColor: '#fff', borderRadius: 10, padding: 12, fontSize: 14, color: '#0f4c20', borderWidth: 1, borderColor: '#d1fae5', minHeight: 80, textAlignVertical: 'top' },
+  resenaBtn: { backgroundColor: '#16a34a', borderRadius: 10, padding: 12, alignItems: 'center' },
+  resenaBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
+  sinResenas: { fontSize: 13, color: '#86a892', textAlign: 'center', paddingVertical: 12 },
   review: { borderTopWidth: 1, borderTopColor: '#f0fdf4', paddingTop: 10, gap: 6 },
   reviewHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   reviewAvatar: { width: 30, height: 30, borderRadius: 15, backgroundColor: '#16a34a', alignItems: 'center', justifyContent: 'center' },
   reviewAvatarText: { color: '#fff', fontWeight: '700', fontSize: 14 },
-  reviewUser: { flex: 1, fontSize: 13, fontWeight: '700', color: '#0f4c20' },
+  reviewUser: { fontSize: 13, fontWeight: '700', color: '#0f4c20' },
+  reviewFecha: { fontSize: 11, color: '#86a892' },
   reviewStars: { fontSize: 12 },
   reviewText: { fontSize: 13, color: '#4b7c5a', lineHeight: 19 },
 });

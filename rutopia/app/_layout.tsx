@@ -6,9 +6,7 @@ function RootNav() {
   const { usuario } = useApp();
   const [listo, setListo] = useState(false);
 
-  useEffect(() => {
-    setListo(true);
-  }, []);
+  useEffect(() => { setListo(true); }, []);
 
   useEffect(() => {
     if (!listo) return;
