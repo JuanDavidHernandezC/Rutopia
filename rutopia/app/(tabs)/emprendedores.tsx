@@ -5,11 +5,12 @@ import { EMPRENDEDORES, useApp } from '../../context/AppContext';
 export default function EmprendedoresScreen() {
   const { t } = useApp();
 
-  const contactar = (email: string, nombre: string) => {
+  const contactar = (email: string, nombre: string, whatsapp: string, instagram: string) => {
     Alert.alert(`Contactar a ${nombre}`, '¿Cómo quieres contactarlo?', [
       { text: 'Cancelar', style: 'cancel' },
       { text: '📧 Email', onPress: () => Linking.openURL(`mailto:${email}`) },
-      { text: '💬 WhatsApp', onPress: () => Linking.openURL('https://wa.me/573001234567') },
+      { text: '💬 WhatsApp', onPress: () => whatsapp && Linking.openURL(`https://wa.me/${whatsapp}`) },
+      { text: '📸 Instagram', onPress: () => instagram && Linking.openURL(`https://instagram.com/${instagram}`) },
     ]);
   };
 
@@ -43,10 +44,36 @@ export default function EmprendedoresScreen() {
                 <Text style={s.municipio}>📍 {e.municipio}</Text>
               </View>
               <Text style={s.desc} numberOfLines={2}>{e.descripcion}</Text>
-              <TouchableOpacity style={s.btnContactar} onPress={() => contactar(e.email, e.nombre)}>
-                <Ionicons name="chatbubble-ellipses-outline" size={16} color="#0a2e12" />
-                <Text style={s.btnContactarText}>Contactar</Text>
-              </TouchableOpacity>
+
+               {/* EMAIL */}
+              <View style={s.redes}>
+                <TouchableOpacity
+                  style={[s.iconBtn, { backgroundColor: '#e0f2fe' }]}
+                  onPress={() => Linking.openURL(`mailto:${e.email}`)}
+                >
+                  <Ionicons name="mail-outline" size={18} color="#0369a1" />
+                </TouchableOpacity>
+
+                {/* WHATSAPP */}
+                {e.whatsapp && (
+                  <TouchableOpacity
+                    style={[s.iconBtn, { backgroundColor: '#dcfce7' }]}
+                    onPress={() => Linking.openURL(`https://wa.me/${e.whatsapp}`)}
+                  >
+                    <Ionicons name="logo-whatsapp" size={18} color="#16a34a" />
+                  </TouchableOpacity>
+                )}
+
+                {/* INSTAGRAM */}
+                {e.instagram && (
+                  <TouchableOpacity
+                    style={[s.iconBtn, { backgroundColor: '#fce7f3' }]}
+                    onPress={() => Linking.openURL(`https://instagram.com/${e.instagram}`)}
+                  >
+                    <Ionicons name="logo-instagram" size={18} color="#db2777" />
+                  </TouchableOpacity>
+                )}
+              </View>
             </View>
           </View>
         ))}
@@ -77,4 +104,6 @@ const s = StyleSheet.create({
   desc: { fontSize: 12, color: '#4b7c5a', lineHeight: 18 },
   btnContactar: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#4ade80', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, alignSelf: 'flex-start', marginTop: 4 },
   btnContactarText: { fontSize: 13, fontWeight: '700', color: '#0a2e12' },
+  redes: {flexDirection: 'row', gap: 10, marginTop: 8,},
+  iconBtn: {width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center',},
 });

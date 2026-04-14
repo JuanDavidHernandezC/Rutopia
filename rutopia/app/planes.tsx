@@ -41,7 +41,7 @@ const EXTRAS = [
   { nombre: 'Categoría premium', precio: '$4.900', desc: 'Desbloquea una categoría completa' },
   { nombre: 'Pack rutas exclusivas', precio: '$9.900', desc: '10 rutas exclusivas de Sabana Centro' },
   { nombre: 'Reseña destacada', precio: '$2.900', desc: 'Tu reseña aparece primera' },
-  { nombre: 'Badge especial', precio: '$1.900', desc: 'Badge de explorador en tu perfil' },
+  { nombre: 'Insignia especial', precio: '$1.900', desc: 'Insignia de explorador en tu perfil' },
   { nombre: 'Sin anuncios 1 semana', precio: '$2.900', desc: 'Experiencia limpia por 7 días' },
 ];
 
