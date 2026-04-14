@@ -12,7 +12,8 @@ export default function ExplorarScreen() {
   const [catActiva, setCatActiva] = useState('Todos');
 
   const CAT_LABEL: Record<string, string> = {
-    Todos: t.explorar === 'Explore' ? 'All' : t.explorar === 'Explorer' ? 'Tous' : t.explorar === 'Explorar' && t.inicio === 'Início' ? 'Todos' : 'Todos',
+    // Añadimos un emoji a "Todos" para igualar la altura y estilo visual
+    Todos: t.explorar === 'Explore' ? '🌎 All' : t.explorar === 'Explorer' ? '🌎 Tous' : '🌎 Todos',
     ecoturismo: '🌿 Eco',
     gastronomia: '🍽️ Gastro',
     cafes: '☕ Cafés',
@@ -60,7 +61,7 @@ export default function ExplorarScreen() {
         horizontal
         showsHorizontalScrollIndicator={false}
         style={s.catsRow}
-        contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}
+        contentContainerStyle={{ paddingHorizontal: 16, gap: 8, alignItems: 'center' }}
       >
         {CATS.map(cat => (
           <TouchableOpacity
@@ -84,14 +85,9 @@ export default function ExplorarScreen() {
             onPress={() => router.push(`/lugar/${lugar.id}` as any)}
             activeOpacity={0.92}
           >
-            {/* Imagen o color */}
             <View style={s.cardImgWrap}>
               {lugar.imagen ? (
-                <Image
-                  source={{ uri: lugar.imagen }}
-                  style={s.cardImg}
-                  resizeMode="cover"
-                />
+                <Image source={{ uri: lugar.imagen }} style={s.cardImg} resizeMode="cover" />
               ) : (
                 <View style={[s.cardImgPlaceholder, { backgroundColor: lugar.color }]}>
                   <Text style={s.cardImgText}>{lugar.categoria.toUpperCase()}</Text>
@@ -143,19 +139,37 @@ const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: '#f0fdf4' },
   searchWrap: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#0a2e12', margin: 16, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, gap: 8 },
   searchInput: { flex: 1, color: '#f0fdf4', fontSize: 15 },
-  catsRow: { maxHeight: 48, marginBottom: 4 },
-  chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, borderWidth: 1.5, borderColor: '#d1fae5', backgroundColor: '#fff' },
+  catsRow: { maxHeight: 50, marginBottom: 8 },
+  // Ajustes de alineación y altura fija para consistencia visual
+  chip: { 
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 16, 
+    height: 38, // Altura fija para que todos sean iguales
+    borderRadius: 20, 
+    borderWidth: 1.5, 
+    borderColor: '#d1fae5', 
+    backgroundColor: '#fff',
+    minWidth: 80, // Evita que los chips cortos se vean "apretados"
+  },
   chipActive: { backgroundColor: '#16a34a', borderColor: '#16a34a' },
-  chipText: { fontSize: 13, color: '#4b7c5a', fontWeight: '600' },
+  chipText: { 
+    fontSize: 14, 
+    color: '#4b7c5a', 
+    fontWeight: '600',
+    includeFontPadding: false, // Vital para centrado en Android
+    textAlignVertical: 'center', 
+  },
   chipTextActive: { color: '#fff' },
   card: { backgroundColor: '#fff', borderRadius: 16, overflow: 'hidden', elevation: 3, shadowColor: '#0f4c20', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8 },
   cardImgWrap: { position: 'relative' },
-  cardImg: { width: '100%', height: 150 },
-  cardImgPlaceholder: { height: 150, alignItems: 'center', justifyContent: 'center' },
+  cardImg: { width: '100%', height: 130 }, 
+  cardImgPlaceholder: { height: 130, alignItems: 'center', justifyContent: 'center' },
   cardImgText: { color: '#fff', fontWeight: '700', fontSize: 15, letterSpacing: 1 },
   sponsorBadge: { position: 'absolute', top: 10, left: 10, backgroundColor: '#fbbf24', borderRadius: 10, paddingHorizontal: 8, paddingVertical: 3 },
   sponsorText: { fontSize: 11, fontWeight: '700', color: '#0a2e12' },
-  cardBody: { padding: 14, gap: 6 },
+  cardBody: { padding: 16, gap: 8 }, 
   cardRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   cardName: { fontSize: 16, fontWeight: '700', color: '#0f4c20', flex: 1 },
   cardMun: { fontSize: 13, color: '#4b7c5a' },
