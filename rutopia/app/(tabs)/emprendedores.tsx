@@ -44,7 +44,8 @@ export default function EmprendedoresScreen() {
                 <Text style={s.municipio}>📍 {e.municipio}</Text>
               </View>
               <Text style={s.desc} numberOfLines={2}>{e.descripcion}</Text>
-      
+
+               {/* EMAIL */}
               <View style={s.redes}>
                 <TouchableOpacity
                   style={[s.iconBtn, { backgroundColor: '#e0f2fe' }]}
