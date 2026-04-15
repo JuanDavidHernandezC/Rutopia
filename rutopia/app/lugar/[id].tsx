@@ -1,9 +1,8 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Linking, Alert, TextInput } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Linking, Alert, TextInput, ImageBackground } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LUGARES, useApp } from '../../context/AppContext';
 import { useState } from 'react';
-import { ImageBackground } from 'react-native';
 
 export default function LugarDetalle() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -57,8 +56,13 @@ export default function LugarDetalle() {
   return (
     <ScrollView style={s.screen} showsVerticalScrollIndicator={false}>
 
-      {/* Hero */}
-      <View style={[s.hero, { backgroundColor: lugar.color }]}>
+      {/* Hero con imagen */}
+      <ImageBackground
+        source={{ uri: lugar.imagen }}
+        style={[s.hero, !lugar.imagen && { backgroundColor: lugar.color }]}
+        resizeMode="cover"
+      >
+        <View style={s.heroOverlay} />
         <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={22} color="#fff" />
         </TouchableOpacity>
@@ -75,7 +79,7 @@ export default function LugarDetalle() {
             </View>
           )}
         </View>
-      </View>
+      </ImageBackground>
 
       <View style={s.body}>
 
@@ -121,7 +125,6 @@ export default function LugarDetalle() {
         <View style={s.card}>
           <Text style={s.cardTitle}>💬 {t.reseñas}</Text>
 
-          {/* Formulario nueva reseña */}
           <View style={s.resenaForm}>
             <Text style={s.resenaFormTitle}>{t.tuResena}</Text>
             <View style={s.starsRow}>
@@ -145,7 +148,6 @@ export default function LugarDetalle() {
             </TouchableOpacity>
           </View>
 
-          {/* Lista reseñas */}
           {todasResenas.length === 0 ? (
             <Text style={s.sinResenas}>Sé el primero en dejar una reseña</Text>
           ) : (
@@ -179,6 +181,7 @@ const s = StyleSheet.create({
   notFoundText: { fontSize: 18, color: '#0f4c20' },
   back: { fontSize: 16, color: '#16a34a', fontWeight: '600' },
   hero: { height: 260, position: 'relative', justifyContent: 'flex-end' },
+  heroOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.25)' },
   backBtn: { position: 'absolute', top: 50, left: 16, backgroundColor: 'rgba(0,0,0,0.3)', borderRadius: 20, padding: 8, zIndex: 1 },
   favBtn: { position: 'absolute', top: 50, right: 16, backgroundColor: 'rgba(0,0,0,0.3)', borderRadius: 20, padding: 8, zIndex: 1 },
   heroContent: { padding: 16, flexDirection: 'row', gap: 8 },
